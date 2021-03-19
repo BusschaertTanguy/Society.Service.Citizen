@@ -1,4 +1,4 @@
-name: [CI] Citizen Service
+name: CI - Citizen Service
 
 on:
   push:
