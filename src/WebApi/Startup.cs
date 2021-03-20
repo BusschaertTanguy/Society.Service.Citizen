@@ -33,6 +33,7 @@ namespace WebApi
 
             services.ConfigureDatabase(Configuration);
             services.ConfigureCitizenServices();
+            services.ConfigureMassTransit(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
