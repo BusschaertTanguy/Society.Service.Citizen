@@ -27,9 +27,9 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> CreateCitizen(Guid id)
         {
-            var request = new GetCitizen.Request(id);
-            var response = await _mediator.Send(request);
-            return Ok(response);
+            var query = new GetCitizen.Query(id);
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 }

@@ -9,9 +9,9 @@ namespace Application.Queries
 {
     public static class GetCitizen
     {
-        public class Request : IRequest<Response>
+        public class Query : IRequest<Result>
         {
-            public Request(Guid id)
+            public Query(Guid id)
             {
                 Id = id;
             }
@@ -19,9 +19,9 @@ namespace Application.Queries
             public Guid Id { get; }
         }
 
-        public class Response
+        public class Result
         {
-            public Response(Guid id, string name)
+            public Result(Guid id, string name)
             {
                 Id = id;
                 Name = name;
@@ -31,7 +31,7 @@ namespace Application.Queries
             public string Name { get; }
         }
 
-        internal class Handler : IRequestHandler<Request, Response>
+        internal class Handler : IRequestHandler<Query, Result>
         {
             private readonly IDbConnectionProvider _connectionProvider;
 
@@ -40,15 +40,15 @@ namespace Application.Queries
                 _connectionProvider = connectionProvider;
             }
 
-            public async Task<Response> Handle(Request request, CancellationToken cancellationToken)
+            public async Task<Result> Handle(Query query, CancellationToken cancellationToken)
             {
                 using var connection = _connectionProvider.GetDbConnection();
                 
-                const string query = "SELECT [Id], [Name] FROM [Citizen] WHERE Id = @Id;";
+                const string dbQuery = "SELECT [Id], [Name] FROM [Citizen] WHERE Id = @Id;";
                 
-                return await connection.QueryFirstOrDefaultAsync<Response>(query, new
+                return await connection.QueryFirstOrDefaultAsync<Result>(dbQuery, new
                 {
-                    request.Id
+                    query.Id
                 });
             }
         }
