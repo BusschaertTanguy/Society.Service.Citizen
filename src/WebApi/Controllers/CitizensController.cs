@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Application.Commands;
 using Application.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,15 +16,16 @@ namespace WebApi.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateCitizen([FromBody] CreateCitizen.Command command)
+        [HttpGet]
+        public async Task<IActionResult> GetCitizen([FromQuery] int? pageIndex, [FromQuery] int? pageSize)
         {
-            await _mediator.Send(command);
-            return Created("api/citizens", command.Id);
+            var query = new GetCitizens.Query(pageIndex, pageSize);
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> CreateCitizen(Guid id)
+        public async Task<IActionResult> GetCitizen(Guid id)
         {
             var query = new GetCitizen.Query(id);
             var result = await _mediator.Send(query);

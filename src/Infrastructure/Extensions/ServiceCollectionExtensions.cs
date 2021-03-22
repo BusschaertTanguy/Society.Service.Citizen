@@ -1,12 +1,15 @@
 ﻿using Application.Configurations;
 using Application.Connections;
 using Application.Events;
+using Application.Services;
 using Application.Transactions;
 using Domain.Repositories;
 using Infrastructure.EntityFramework.Contexts;
 using Infrastructure.EntityFramework.Repositories;
 using Infrastructure.EntityFramework.Transactions;
+using Infrastructure.MassTransit.Filters;
 using Infrastructure.Queries;
+using Infrastructure.Services;
 using MassTransit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +30,7 @@ namespace Infrastructure.Extensions
         public static void ConfigureCitizenServices(this IServiceCollection services)
         {
             services.AddMediatR(typeof(ApplicationLayerConfiguration).Assembly);
+            services.AddSingleton<INameGenerator, RandomNameGenerator>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<ICitizenRepository, CitizenRepository>();
         }
@@ -41,7 +45,9 @@ namespace Infrastructure.Extensions
 
             services.AddMassTransit(cfg =>
             {
-                cfg.UsingRabbitMq((_, configurator) =>
+                cfg.AddConsumer<AddCitizenWhenUniverseCreated>();
+
+                cfg.UsingRabbitMq((context, configurator) =>
                 {
                     configurator.Host(host, "/", h =>
                     {
@@ -49,10 +55,13 @@ namespace Infrastructure.Extensions
                         h.Password(password);
                     });
 
+                    configurator.UseConsumeFilter(typeof(ConsumerLogFilter<>), context);
+                    configurator.UseSendFilter(typeof(SendLogFilter<>), context);
+                    configurator.UsePublishFilter(typeof(PublishLogFilter<>), context);
+                    
                     configurator.ReceiveEndpoint(universeEndpoint, e =>
                     {
-                        e.Consumer<UniverseCreatedConsumer>();
-                        e.Consumer<DayPassedConsumer>();
+                        e.Consumer<AddCitizenWhenUniverseCreated>(context);
                     });
                 });
             });
