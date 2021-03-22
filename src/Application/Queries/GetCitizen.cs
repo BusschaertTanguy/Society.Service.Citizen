@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Application.Connections;
 using Dapper;
+using Domain;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Queries
 {
@@ -21,31 +22,35 @@ namespace Application.Queries
 
         public class Result
         {
-            public Result(Guid id, string name)
+            public Result(Guid id, Gender gender, string name, DateTime dateOfBirth)
             {
                 Id = id;
+                Gender = gender;
                 Name = name;
+                DateOfBirth = dateOfBirth;
             }
 
+            public DateTime DateOfBirth { get; }
+            public Gender Gender { get; }
             public Guid Id { get; }
             public string Name { get; }
         }
 
-        internal class Handler : IRequestHandler<Query, Result>
+        internal class Handler : QueryHandler<Query, Result>
         {
             private readonly IDbConnectionProvider _connectionProvider;
 
-            public Handler(IDbConnectionProvider connectionProvider)
+            public Handler(ILogger<QueryHandler<Query, Result>> logger, IDbConnectionProvider connectionProvider) : base(logger)
             {
                 _connectionProvider = connectionProvider;
             }
 
-            public async Task<Result> Handle(Query query, CancellationToken cancellationToken)
+            protected override async Task<Result> Process(Query query)
             {
                 using var connection = _connectionProvider.GetDbConnection();
-                
-                const string dbQuery = "SELECT [Id], [Name] FROM [Citizen] WHERE Id = @Id;";
-                
+
+                const string dbQuery = "SELECT [Id], [Gender], [Name], [DateOfBirth] FROM [Citizen] WHERE Id = @Id;";
+
                 return await connection.QueryFirstOrDefaultAsync<Result>(dbQuery, new
                 {
                     query.Id

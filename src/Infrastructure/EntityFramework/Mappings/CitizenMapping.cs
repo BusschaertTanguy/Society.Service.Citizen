@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using System;
+using Domain;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +13,16 @@ namespace Infrastructure.EntityFramework.Mappings
             builder
                 .Property<string>("_name")
                 .HasColumnName("Name")
+                .IsRequired();
+
+            builder
+                .Property<DateTime>("_dateOfBirth")
+                .HasColumnName("DateOfBirth")
+                .IsRequired();
+
+            builder
+                .Property<Gender>("_gender")
+                .HasColumnName("Gender")
                 .IsRequired();
         }
     }
