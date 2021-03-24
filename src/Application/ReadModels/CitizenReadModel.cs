@@ -2,7 +2,7 @@
 
 namespace Application.ReadModels
 {
-    internal class CitizenReadModel
+    public class CitizenReadModel
     {
         public CitizenReadModel(Guid id, string name)
         {

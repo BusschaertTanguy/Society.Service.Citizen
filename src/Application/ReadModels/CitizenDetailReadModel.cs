@@ -3,7 +3,7 @@ using Domain;
 
 namespace Application.ReadModels
 {
-    internal class CitizenDetailReadModel
+    public class CitizenDetailReadModel
     {
         public CitizenDetailReadModel(Guid id, Gender gender, string name, DateTime dateOfBirth)
         {
