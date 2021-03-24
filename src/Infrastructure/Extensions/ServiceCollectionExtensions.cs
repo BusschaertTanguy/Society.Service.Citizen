@@ -1,9 +1,10 @@
 ﻿using Application.Configurations;
-using Application.Connections;
 using Application.Events;
+using Application.Queries;
 using Application.Services;
 using Application.Transactions;
 using Domain.Repositories;
+using Infrastructure.Dapper.Queries;
 using Infrastructure.EntityFramework.Contexts;
 using Infrastructure.EntityFramework.Repositories;
 using Infrastructure.EntityFramework.Transactions;
@@ -24,7 +25,7 @@ namespace Infrastructure.Extensions
         {
             var connectionString = configuration.GetConnectionString("CitizenDb");
             services.AddDbContext<CitizenDbContext>(options => options.UseSqlServer(connectionString));
-            services.AddScoped<IDbConnectionProvider>(_ => new SqlDbConnectionProvider(connectionString));
+            services.AddScoped(_ => new SqlDbConnectionProvider(connectionString));
         }
 
         public static void ConfigureCitizenServices(this IServiceCollection services)
@@ -33,6 +34,7 @@ namespace Infrastructure.Extensions
             services.AddSingleton<INameGenerator, RandomNameGenerator>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddTransient<ICitizenRepository, CitizenRepository>();
+            services.AddTransient<ICitizenQueries, CitizenQueries>();
         }
 
         public static void ConfigureMassTransit(this IServiceCollection services, IConfiguration configuration)
@@ -58,11 +60,8 @@ namespace Infrastructure.Extensions
                     configurator.UseConsumeFilter(typeof(ConsumerLogFilter<>), context);
                     configurator.UseSendFilter(typeof(SendLogFilter<>), context);
                     configurator.UsePublishFilter(typeof(PublishLogFilter<>), context);
-                    
-                    configurator.ReceiveEndpoint(universeEndpoint, e =>
-                    {
-                        e.Consumer<AddCitizenWhenUniverseCreated>(context);
-                    });
+
+                    configurator.ReceiveEndpoint(universeEndpoint, e => { e.Consumer<AddCitizenWhenUniverseCreated>(context); });
                 });
             });
 

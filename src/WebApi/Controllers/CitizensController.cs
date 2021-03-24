@@ -17,7 +17,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCitizen([FromQuery] int? pageIndex, [FromQuery] int? pageSize)
+        public async Task<IActionResult> GetCitizen([FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 25)
         {
             var query = new GetCitizens.Query(pageIndex, pageSize);
             var result = await _mediator.Send(query);

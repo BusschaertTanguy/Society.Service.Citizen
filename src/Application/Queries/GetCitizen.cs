@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Application.Connections;
-using Dapper;
-using Domain;
+using Application.ReadModels;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -10,7 +8,7 @@ namespace Application.Queries
 {
     public static class GetCitizen
     {
-        public class Query : IRequest<Result>
+        public class Query : IRequest<CitizenDetailReadModel>
         {
             public Query(Guid id)
             {
@@ -20,41 +18,18 @@ namespace Application.Queries
             public Guid Id { get; }
         }
 
-        public class Result
+        internal class Handler : QueryHandler<Query, CitizenDetailReadModel>
         {
-            public Result(Guid id, Gender gender, string name, DateTime dateOfBirth)
+            private readonly ICitizenQueries _queries;
+
+            public Handler(ILogger<QueryHandler<Query, CitizenDetailReadModel>> logger, ICitizenQueries queries) : base(logger)
             {
-                Id = id;
-                Gender = gender;
-                Name = name;
-                DateOfBirth = dateOfBirth;
+                _queries = queries;
             }
 
-            public DateTime DateOfBirth { get; }
-            public Gender Gender { get; }
-            public Guid Id { get; }
-            public string Name { get; }
-        }
-
-        internal class Handler : QueryHandler<Query, Result>
-        {
-            private readonly IDbConnectionProvider _connectionProvider;
-
-            public Handler(ILogger<QueryHandler<Query, Result>> logger, IDbConnectionProvider connectionProvider) : base(logger)
+            protected override Task<CitizenDetailReadModel> Process(Query query)
             {
-                _connectionProvider = connectionProvider;
-            }
-
-            protected override async Task<Result> Process(Query query)
-            {
-                using var connection = _connectionProvider.GetDbConnection();
-
-                const string dbQuery = "SELECT [Id], [Gender], [Name], [DateOfBirth] FROM [Citizen] WHERE Id = @Id;";
-
-                return await connection.QueryFirstOrDefaultAsync<Result>(dbQuery, new
-                {
-                    query.Id
-                });
+                return _queries.GetCitizen(query.Id);
             }
         }
     }
