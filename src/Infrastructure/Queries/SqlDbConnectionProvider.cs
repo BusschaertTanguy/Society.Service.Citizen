@@ -1,10 +1,9 @@
 ﻿using System.Data;
-using Application.Connections;
 using Microsoft.Data.SqlClient;
 
 namespace Infrastructure.Queries
 {
-    public class SqlDbConnectionProvider : IDbConnectionProvider
+    internal class SqlDbConnectionProvider
     {
         private readonly string _connectionString;
 
