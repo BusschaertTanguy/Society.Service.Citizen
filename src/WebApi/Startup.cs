@@ -34,6 +34,7 @@ namespace WebApi
             services.ConfigureDatabase(Configuration);
             services.ConfigureCitizenServices();
             services.ConfigureMassTransit(Configuration);
+            services.ConfigureConsul(Configuration);
             services.AddCors(option => option.AddPolicy("All", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
         }
 
