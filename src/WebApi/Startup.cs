@@ -1,3 +1,5 @@
+using System;
+using Application.Services;
 using Infrastructure.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,7 +36,13 @@ namespace WebApi
             services.ConfigureDatabase(Configuration);
             services.ConfigureCitizenServices();
             services.ConfigureMassTransit(Configuration);
-            services.ConfigureConsul(Configuration);
+
+            services.AddHttpClient<IUniverseService, UniverseService>(client =>
+            {
+                var endpoint = $"http://{Configuration["Services:Universe"]}/api/";
+                client.BaseAddress = new Uri(endpoint);
+            });
+
             services.AddCors(option => option.AddPolicy("All", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
         }
 
